@@ -1,14 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { Wallet, TrendingUp, Shield, Clock, ArrowRight } from "lucide-react"
+import { TrendingUp, Shield, Clock, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { WalletModal } from "./wallet-modal"
 
 export function VaultSection() {
   const [depositAmount, setDepositAmount] = useState("1000")
-  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false)
 
   const apy = 3.5
   const tvl = 24582910
@@ -76,13 +75,7 @@ export function VaultSection() {
               </div>
             </div>
 
-            <Button
-              className="w-full bg-gold hover:bg-gold-dark text-dark-charcoal font-semibold py-6 text-lg"
-              onClick={() => setIsWalletModalOpen(true)}
-            >
-              <Wallet className="mr-2 h-5 w-5" />
-              Connect Wallet to Deposit
-            </Button>
+            <WalletModal fullWidth buttonText="Connect Wallet to Deposit" />
           </div>
         </div>
 
@@ -154,8 +147,6 @@ export function VaultSection() {
           </div>
         </div>
       </div>
-
-      <WalletModal isOpen={isWalletModalOpen} onClose={() => setIsWalletModalOpen(false)} />
     </div>
   )
 }

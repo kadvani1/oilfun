@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { X, ChevronDown } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { WalletModal } from "./wallet-modal"
 
@@ -21,7 +20,6 @@ export function BettingModal({ isOpen, onClose, market }: BettingModalProps) {
   const [mode, setMode] = useState<"buy" | "sell">("buy")
   const [selectedOption, setSelectedOption] = useState<"yes" | "no">("yes")
   const [amount, setAmount] = useState(1000)
-  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false)
 
   if (!isOpen) return null
 
@@ -146,17 +144,9 @@ export function BettingModal({ isOpen, onClose, market }: BettingModalProps) {
           </div>
 
           {/* Connect Wallet Button */}
-          <Button
-            className="w-full py-6 text-lg font-semibold bg-gold hover:bg-gold-dark text-dark-charcoal rounded-2xl"
-            onClick={() => setIsWalletModalOpen(true)}
-          >
-            Connect wallet
-          </Button>
+          <WalletModal fullWidth className="w-full py-6 text-lg font-semibold bg-gold hover:bg-gold-dark text-dark-charcoal rounded-2xl" />
         </div>
       </div>
-
-      {/* WalletModal component */}
-      <WalletModal isOpen={isWalletModalOpen} onClose={() => setIsWalletModalOpen(false)} />
     </>
   )
 }

@@ -1,82 +1,137 @@
 "use client"
 
-import { X } from "lucide-react"
+import { ConnectButton, useConnectModal } from "@rainbow-me/rainbowkit"
+import { useAccount } from "wagmi"
+import { Wallet } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface WalletModalProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen?: boolean
+  onClose?: () => void
+  className?: string
+  fullWidth?: boolean
+  buttonText?: string
 }
 
-const wallets = [
-  {
-    name: "MetaMask",
-    icon: "🦊",
-    description: "Connect to your MetaMask wallet",
-  },
-  {
-    name: "WalletConnect",
-    icon: "🔗",
-    description: "Scan with WalletConnect",
-  },
-  {
-    name: "Coinbase Wallet",
-    icon: "💼",
-    description: "Connect to Coinbase Wallet",
-  },
-  {
-    name: "Trust Wallet",
-    icon: "🛡️",
-    description: "Connect to Trust Wallet",
-  },
-  {
-    name: "Phantom",
-    icon: "👻",
-    description: "Connect to Phantom wallet",
-  },
-]
+// Custom ConnectButton wrapper that matches the app's design
+export function WalletModal({ 
+  isOpen, 
+  onClose, 
+  className,
+  fullWidth = false,
+  buttonText = "Connect Wallet"
+}: WalletModalProps) {
+  const { isConnected, address } = useAccount()
+  const { openConnectModal } = useConnectModal()
 
-export function WalletModal({ isOpen, onClose }: WalletModalProps) {
-  if (!isOpen) return null
+  // If wallet is connected, show address/account info
+  if (isConnected && address) {
+    return (
+      <ConnectButton.Custom>
+        {({
+          account,
+          chain,
+          openAccountModal,
+          openChainModal,
+          openConnectModal,
+          mounted,
+        }) => {
+          const ready = mounted
+          const connected = ready && account && chain
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-
-      {/* Modal */}
-      <div className="relative bg-card rounded-3xl p-8 w-full max-w-md mx-4 shadow-2xl">
-        {/* Close button */}
-        <button onClick={onClose} className="absolute top-6 right-6 text-muted-foreground hover:text-foreground">
-          <X className="h-6 w-6" />
-        </button>
-
-        {/* Header */}
-        <h2 className="text-2xl font-bold text-foreground mb-2">Connect Wallet</h2>
-        <p className="text-muted-foreground mb-6">Choose your preferred wallet to connect</p>
-
-        {/* Wallet Options */}
-        <div className="space-y-3">
-          {wallets.map((wallet) => (
-            <button
-              key={wallet.name}
-              className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-border hover:border-gold bg-card hover:bg-gold/5 transition-all group"
-              onClick={() => {
-                // Handle wallet connection
-                console.log(`Connecting to ${wallet.name}`)
-                onClose()
-              }}
+          return (
+            <div
+              {...(!ready && {
+                "aria-hidden": true,
+                style: {
+                  opacity: 0,
+                  pointerEvents: "none",
+                  userSelect: "none",
+                },
+              })}
+              className={cn("flex items-center gap-2", fullWidth && "w-full flex-col")}
             >
-              <div className="w-12 h-12 rounded-xl bg-gold/10 flex items-center justify-center text-2xl group-hover:bg-gold/20 transition-colors">
-                {wallet.icon}
-              </div>
-              <div className="flex-1 text-left">
-                <div className="font-semibold text-foreground">{wallet.name}</div>
-                <div className="text-sm text-muted-foreground">{wallet.description}</div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
+              {(() => {
+                if (!connected) {
+                  return (
+                    <button
+                      onClick={openConnectModal}
+                      type="button"
+                      className={cn(
+                        "bg-gold hover:bg-gold-dark text-dark-charcoal font-semibold px-4 py-2 rounded-lg flex items-center justify-center gap-2",
+                        fullWidth && "w-full py-6 text-lg",
+                        className
+                      )}
+                    >
+                      <Wallet className="h-4 w-4" />
+                      {buttonText}
+                    </button>
+                  )
+                }
+
+                return (
+                  <>
+                    <button
+                      onClick={openChainModal}
+                      type="button"
+                      className="bg-gold/10 hover:bg-gold/20 text-gold font-semibold px-3 py-2 rounded-lg text-sm border border-gold/30 flex items-center gap-2"
+                    >
+                      {chain.hasIcon && (
+                        <div
+                          style={{
+                            background: chain.iconBackground,
+                            width: 12,
+                            height: 12,
+                            borderRadius: 999,
+                            overflow: "hidden",
+                            display: "inline-block",
+                          }}
+                        >
+                          {chain.iconUrl && (
+                            <img
+                              alt={chain.name ?? "Chain icon"}
+                              src={chain.iconUrl}
+                              style={{ width: 12, height: 12 }}
+                            />
+                          )}
+                        </div>
+                      )}
+                      {chain.name}
+                    </button>
+
+                    <button
+                      onClick={openAccountModal}
+                      type="button"
+                      className="bg-gold hover:bg-gold-dark text-dark-charcoal font-semibold px-4 py-2 rounded-lg"
+                    >
+                      {account.displayName}
+                      {account.displayBalance
+                        ? ` (${account.displayBalance})`
+                        : ""}
+                    </button>
+                  </>
+                )
+              })()}
+            </div>
+          )
+        }}
+      </ConnectButton.Custom>
+    )
+  }
+
+  // If not connected, show connect button
+  return (
+    <button
+      onClick={openConnectModal}
+      type="button"
+      className={cn(
+        "bg-gold hover:bg-gold-dark text-dark-charcoal font-semibold px-4 py-2 rounded-lg flex items-center justify-center gap-2",
+        fullWidth && "w-full py-6 text-lg",
+        className
+      )}
+    >
+      <Wallet className="h-4 w-4" />
+      {buttonText}
+    </button>
   )
 }
