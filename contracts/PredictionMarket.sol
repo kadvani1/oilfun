@@ -3,7 +3,7 @@ pragma solidity ^0.8.28;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract Polymarket {
+contract AlloMarkets {
     address public owner;
     address public collateralToken;
 
@@ -91,7 +91,7 @@ contract Polymarket {
     }
 
     function addYesBet(uint256 _questionId, uint256 _value) public payable {
-        require(_questionId == 0, "Question ID cannot be null");
+        require(_questionId < totalQuestions, "Question does not exist");
         Questions storage question = questions[_questionId];
         IERC20(collateralToken).transferFrom(msg.sender, address(this), _value);
         AmountAdded memory amountAdded = AmountAdded(
@@ -106,7 +106,7 @@ contract Polymarket {
     }
 
     function addNoBet(uint256 _questionId, uint256 _value) public payable {
-        require(_questionId == 0, "Question ID cannot be null");
+        require(_questionId < totalQuestions, "Question does not exist");
         Questions storage question = questions[_questionId];
         IERC20(collateralToken).transferFrom(msg.sender, address(this), _value);
         AmountAdded memory amountAdded = AmountAdded(

@@ -92,7 +92,8 @@ A decentralized prediction market platform for energy markets, enabling users to
 
 | Component | Description |
 |-----------|-------------|
-| **PredictionMarketAMM.sol** | Main prediction market contract with AMM pricing |
+| **AlloMarkets** | Main prediction market contract with AMM pricing (`0x9b2D20D72f0E39ef90462EcC2732887320c1C50e`) |
+| **USDC (BSC)** | Payment token (`0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d`) |
 | **OpenZeppelin** | Security libraries (ReentrancyGuard, SafeERC20) |
 | **Solidity** | ^0.8.19 |
 
@@ -179,7 +180,7 @@ graph TD
 
 ## 📜 Smart Contract
 
-### PredictionMarketAMM Contract
+### AlloMarkets Contract
 
 The core smart contract implements an AMM (Automated Market Maker) model for prediction markets.
 
@@ -189,7 +190,7 @@ The core smart contract implements an AMM (Automated Market Maker) model for pre
 - Proportional payout distribution to winners
 - Reentrancy protection and security best practices
 
-**Contract Address:** `[To be deployed]`
+**Contract Address:** `0x9b2D20D72f0E39ef90462EcC2732887320c1C50e`
 
 **Network:** BNB Chain (BSC) Mainnet
 
@@ -229,7 +230,9 @@ APRO_API_SECRET=your_apro_api_secret
 
 **Network:** BNB Chain (BSC) Mainnet
 
-**Contract Address:** `[To be deployed]`
+**Contract Address:** `0x9b2D20D72f0E39ef90462EcC2732887320c1C50e`
+
+**BSCScan:** [View Contract](https://bscscan.com/address/0x9b2D20D72f0E39ef90462EcC2732887320c1C50e)
 
 **Deployment Steps:**
 1. Compile contract: `npx hardhat compile`
@@ -237,9 +240,9 @@ APRO_API_SECRET=your_apro_api_secret
 3. Verify contract: `npx hardhat verify --network bsc <CONTRACT_ADDRESS>`
 
 **Verification:**
-- [ ] Contract verified on BSCScan
-- [ ] Contract address updated in frontend
-- [ ] USDC token address configured
+- [x] Contract deployed on BSC Mainnet
+- [x] Contract address updated in frontend
+- [x] USDC token address configured (`0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d`)
 
 ### Build & Run Locally
 

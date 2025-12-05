@@ -6,7 +6,7 @@ import ERC20ABI from "@/ABI/ERC20ABI.json"
 export const BSC_RPC_URL = "https://bsc-dataseed1.binance.org"
 
 // Contract addresses on BSC
-export const ALLO_MARKETS_ADDRESS = "0x47c20426C7097dB113466421b8aeDCC813137B69" as const
+export const ALLO_MARKETS_ADDRESS = "0x9b2D20D72f0E39ef90462EcC2732887320c1C50e" as const
 export const USDC_ADDRESS = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d" as const
 
 // Contract configs for wagmi

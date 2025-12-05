@@ -9,25 +9,11 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Markets - Prediction Markets",
-  description: "Trade on prediction markets for tech companies, real estate, and more",
-  generator: "v0.app",
+  title: "Oil.fun - Energy Prediction Markets",
+  description: "Decentralized prediction markets for oil prices, OPEC decisions, and energy markets on BNB Chain",
   icons: {
-    icon: [
-      {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
-      },
-    ],
-    apple: "/apple-icon.png",
+    icon: "/icon.svg",
+    apple: "/icon.svg",
   },
 }
 

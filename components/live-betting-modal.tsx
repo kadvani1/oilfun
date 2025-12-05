@@ -117,10 +117,12 @@ export function LiveBettingModal({
   const handleApprove = async () => {
     setStep("approving")
     try {
+      // Unlimited approval (max uint256) so user doesn't need to approve again
+      const maxApproval = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
       approve({
         ...usdcConfig,
         functionName: "approve",
-        args: [ALLO_MARKETS_ADDRESS, amountInWei],
+        args: [ALLO_MARKETS_ADDRESS, maxApproval],
       })
     } catch (err) {
       setStep("error")
@@ -132,10 +134,11 @@ export function LiveBettingModal({
     setStep("betting")
     try {
       const functionName = selectedOption === "yes" ? "addYesBet" : "addNoBet"
+      // Use market.questionId (the actual contract ID) not market.id (array index)
       placeBet({
         ...alloMarketsConfig,
         functionName,
-        args: [BigInt(market.id), amountInWei],
+        args: [BigInt(market.questionId), amountInWei],
       })
     } catch (err) {
       setStep("error")

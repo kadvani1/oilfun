@@ -1,6 +1,6 @@
 "use client"
 
-import { Search } from "lucide-react"
+import { Search, Droplet } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { WalletModal } from "./wallet-modal"
 
@@ -14,7 +14,12 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
     <header className="border-b border-border bg-dark-charcoal">
       <div className="container mx-auto flex items-center justify-between px-4 py-4">
         <div className="flex items-center gap-8">
-          <h1 className="text-lg font-semibold text-gold">Oil.fun</h1>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center">
+              <Droplet className="h-5 w-5 text-white fill-white" />
+            </div>
+            <h1 className="text-xl font-bold text-gold">Oil.fun</h1>
+          </div>
           <nav className="flex items-center gap-1">
             <button
               onClick={() => onTabChange("markets")}

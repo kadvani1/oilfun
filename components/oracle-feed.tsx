@@ -64,67 +64,79 @@ export function OracleFeed() {
   const fetchPrices = useCallback(async (refresh: boolean = false) => {
     try {
       setError(null)
-      const url = refresh ? "/api/oracle?refresh=true" : "/api/oracle"
-      const response = await fetch(url)
-      const data = await response.json()
-
-      if (!data.success) {
-        throw new Error(data.error || "Failed to fetch prices")
-      }
+      
+      // Fetch crypto and oil prices in parallel from separate endpoints
+      const cryptoUrl = refresh ? "/api/oracle?refresh=true" : "/api/oracle"
+      const oilUrl = refresh ? "/api/oilprice?refresh=true" : "/api/oilprice"
+      
+      const [cryptoResponse, oilResponse] = await Promise.all([
+        fetch(cryptoUrl),
+        fetch(oilUrl),
+      ])
 
       const now = new Date()
       setLastFetch(now)
 
       // Process crypto prices
-      if (data.data && data.data.length > 0) {
-        setCryptoPrices((prevPrices) => {
-          return data.data.map((item: OraclePrice) => {
-            const prevPrice = prevPrices.find((p) => p.symbol === `${item.name}/USD`)
-            const previousPrice = prevPrice?.price || item.price
-            const change = item.price - previousPrice
-            const changePercent = previousPrice > 0 ? (change / previousPrice) * 100 : 0
+      try {
+        const cryptoData = await cryptoResponse.json()
+        if (cryptoData.success && cryptoData.data && cryptoData.data.length > 0) {
+          setCryptoPrices((prevPrices) => {
+            return cryptoData.data.map((item: OraclePrice) => {
+              const prevPrice = prevPrices.find((p) => p.symbol === `${item.name}/USD`)
+              const previousPrice = prevPrice?.price || item.price
+              const change = item.price - previousPrice
+              const changePercent = previousPrice > 0 ? (change / previousPrice) * 100 : 0
 
-            return {
-              name: cryptoNames[item.name] || item.name,
-              symbol: `${item.name}/USD`,
-              price: item.price,
-              previousPrice,
-              change,
-              changePercent,
-              lastUpdate: "Just now",
-              timestamp: item.timestamp,
-              type: "crypto" as const,
-            }
+              return {
+                name: cryptoNames[item.name] || item.name,
+                symbol: `${item.name}/USD`,
+                price: item.price,
+                previousPrice,
+                change,
+                changePercent,
+                lastUpdate: "Just now",
+                timestamp: item.timestamp,
+                type: "crypto" as const,
+              }
+            })
           })
-        })
+        }
+      } catch (cryptoErr) {
+        console.error("Failed to fetch crypto prices:", cryptoErr)
       }
 
-      // Process oil prices
-      if (data.oilPrices && data.oilPrices.length > 0) {
-        setOilPrices((prevPrices) => {
-          return data.oilPrices.map((item: OraclePrice) => {
-            const prevPrice = prevPrices.find((p) => p.symbol === `${item.name}/USD`)
-            const previousPrice = prevPrice?.price || item.price
-            const change = item.price - previousPrice
-            // Parse change string like "+1.2%" to get the percentage
-            const changeString = item.change || ""
-            const changePercent = parseFloat(changeString.replace("%", "")) || 
-              (previousPrice > 0 ? (change / previousPrice) * 100 : 0)
+      // Process oil prices directly from /api/oilprice
+      try {
+        const oilData = await oilResponse.json()
+        if (oilData.success && oilData.data && oilData.data.length > 0) {
+          setOilPrices((prevPrices) => {
+            return oilData.data.map((item: OraclePrice) => {
+              const prevPrice = prevPrices.find((p) => p.symbol === `${item.name}/USD`)
+              const previousPrice = prevPrice?.price || item.price
+              const change = item.price - previousPrice
+              // Parse change string like "+1.2%" to get the percentage
+              const changeString = item.change || ""
+              const changePercent = parseFloat(changeString.replace("%", "")) || 
+                (previousPrice > 0 ? (change / previousPrice) * 100 : 0)
 
-            return {
-              name: oilNames[item.name] || item.name,
-              symbol: `${item.name}/USD`,
-              price: item.price,
-              previousPrice,
-              change,
-              changePercent,
-              changeString,
-              lastUpdate: "Just now",
-              timestamp: item.timestamp || Date.now(),
-              type: "oil" as const,
-            }
+              return {
+                name: oilNames[item.name] || item.name,
+                symbol: `${item.name}/USD`,
+                price: item.price,
+                previousPrice,
+                change,
+                changePercent,
+                changeString,
+                lastUpdate: "Just now",
+                timestamp: item.timestamp || Date.now(),
+                type: "oil" as const,
+              }
+            })
           })
-        })
+        }
+      } catch (oilErr) {
+        console.error("Failed to fetch oil prices:", oilErr)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch prices")
