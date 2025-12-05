@@ -9,11 +9,13 @@ interface OraclePrice {
   price: number
   timestamp: number
   source: string
+  change?: string
 }
 
 interface OracleResponse {
   success: boolean
   data: OraclePrice[]
+  oilPrices?: OraclePrice[]
   error?: string
 }
 
@@ -65,10 +67,50 @@ async function fetchCurrencyPrice(currency: SupportedCurrency): Promise<OraclePr
 // Delay function for staggered requests
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
+// Fetch oil prices from the oilprice API route
+async function fetchOilPrices(refresh: boolean = false): Promise<OraclePrice[]> {
+  try {
+    // Use internal API route for oil prices
+    const baseUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}` 
+      : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    
+    const url = refresh 
+      ? `${baseUrl}/api/oilprice?refresh=true`
+      : `${baseUrl}/api/oilprice`
+    
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    })
+
+    if (!response.ok) {
+      console.error(`Failed to fetch oil prices: ${response.status}`)
+      return []
+    }
+
+    const data = await response.json()
+    
+    if (!data.success) {
+      console.error("Oil price API returned non-success status")
+      return []
+    }
+
+    return data.data || []
+  } catch (error) {
+    console.error("Error fetching oil prices:", error)
+    return []
+  }
+}
+
 // GET handler - fetch all prices
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const currencyParam = searchParams.get("currency")
+  const refresh = searchParams.get("refresh") === "true"
 
   // If specific currency requested
   if (currencyParam) {
@@ -91,25 +133,27 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, data: [price] })
   }
 
-  // Fetch all currencies in parallel with staggered delays to avoid rate limiting
-  const prices: OraclePrice[] = []
-  const delayMs = 100 // 100ms delay between requests
-
-  const fetchPromises = SUPPORTED_CURRENCIES.map(async (currency, index) => {
-    // Stagger requests
-    await delay(index * delayMs)
+  // Fetch crypto and oil prices in parallel
+  const cryptoPromises = SUPPORTED_CURRENCIES.map(async (currency, index) => {
+    // Stagger crypto requests
+    await delay(index * 100)
     return fetchCurrencyPrice(currency)
   })
 
-  const results = await Promise.all(fetchPromises)
+  // Call both APIs in parallel (pass refresh flag to oil prices)
+  const [cryptoResults, oilPrices] = await Promise.all([
+    Promise.all(cryptoPromises),
+    fetchOilPrices(refresh),
+  ])
 
-  for (const result of results) {
+  const prices: OraclePrice[] = []
+  for (const result of cryptoResults) {
     if (result) {
       prices.push(result)
     }
   }
 
-  if (prices.length === 0) {
+  if (prices.length === 0 && oilPrices.length === 0) {
     return NextResponse.json(
       { success: false, error: "Failed to fetch any prices" },
       { status: 500 }
@@ -119,6 +163,7 @@ export async function GET(request: NextRequest) {
   const response: OracleResponse = {
     success: true,
     data: prices,
+    oilPrices: oilPrices,
   }
 
   return NextResponse.json(response)

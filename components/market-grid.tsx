@@ -1,12 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { MarketCard } from "@/components/market-card"
+import { LiveMarketCard } from "@/components/live-market-card"
+import { useTotalQuestions } from "@/hooks/use-market-data"
 import { cn } from "@/lib/utils"
+import { Zap, TrendingUp, Loader2 } from "lucide-react"
 
 const categories = ["All", "Crude Oil", "Natural Gas", "OPEC", "Energy ETFs"]
 
-const markets = [
+// Demo markets for display
+const demoMarkets = [
   {
     id: 1,
     icon: "🛢️",
@@ -17,7 +21,6 @@ const markets = [
       { label: "No", percentage: 66 },
     ],
     volume: "$12,491,045",
-    selected: true,
   },
   {
     id: 2,
@@ -96,61 +99,24 @@ const markets = [
     ],
     volume: "$6,847,291",
   },
-  {
-    id: 9,
-    icon: "🛢️",
-    iconBg: "bg-gold-light",
-    question: "Oil demand reaches new all-time high in 2026?",
-    options: [
-      { label: "Yes", percentage: 64 },
-      { label: "No", percentage: 36 },
-    ],
-    volume: "$8,382,910",
-  },
-  {
-    id: 10,
-    icon: "🌍",
-    iconBg: "bg-uae-green/20",
-    question: "OPEC market share falls below 30% by 2026?",
-    options: [
-      { label: "Yes", percentage: 23 },
-      { label: "No", percentage: 77 },
-    ],
-    volume: "$3,293,182",
-  },
-  {
-    id: 11,
-    icon: "🔥",
-    iconBg: "bg-uae-red/20",
-    question: "European gas prices spike 50%+ in 2026?",
-    options: [
-      { label: "Yes", percentage: 31 },
-      { label: "No", percentage: 69 },
-    ],
-    volume: "$5,182,394",
-  },
-  {
-    id: 12,
-    icon: "🛢️",
-    iconBg: "bg-gold-light",
-    question: "ADNOC acquires another major oil company in 2026?",
-    options: [
-      { label: "Yes", percentage: 18 },
-      { label: "No", percentage: 82 },
-    ],
-    volume: "$4,382,910",
-  },
 ]
 
 export function MarketGrid() {
   const [activeCategory, setActiveCategory] = useState("All")
+  const { totalQuestions, isLoading: isLoadingTotal } = useTotalQuestions()
+
+  // Generate array of question IDs from 0 to totalQuestions-1
+  const questionIds = useMemo(() => {
+    if (totalQuestions <= 0) return []
+    return Array.from({ length: totalQuestions }, (_, i) => i)
+  }, [totalQuestions])
 
   return (
-    <div>
-      <h2 className="text-3xl font-bold text-foreground mb-6">Trending</h2>
+    <div className="space-y-10">
+      <h2 className="text-3xl font-bold text-foreground">Trending</h2>
 
       {/* Category Tabs */}
-      <div className="flex gap-6 mb-8 border-b border-border">
+      <div className="flex gap-6 border-b border-border">
         {categories.map((category) => (
           <button
             key={category}
@@ -166,11 +132,57 @@ export function MarketGrid() {
         ))}
       </div>
 
-      {/* Market Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {markets.map((market) => (
-          <MarketCard key={market.id} market={market} />
-        ))}
+      {/* Live Markets Section - Only shown in "All" category */}
+      {activeCategory === "All" && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-uae-green/10 px-3 py-1.5 rounded-full">
+              <Zap className="h-4 w-4 text-uae-green" />
+              <span className="text-sm font-semibold text-uae-green">Live Markets</span>
+            </div>
+            <p className="text-sm text-muted-foreground">Trade with real USDC on BSC</p>
+            {totalQuestions > 0 && (
+              <span className="text-xs bg-gold/20 text-gold px-2 py-0.5 rounded-full font-medium">
+                {totalQuestions} market{totalQuestions !== 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
+
+          {/* Live Market Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {isLoadingTotal ? (
+              <div className="col-span-full flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-gold" />
+                <span className="ml-3 text-muted-foreground">Loading markets...</span>
+              </div>
+            ) : questionIds.length > 0 ? (
+              questionIds.map((questionId) => (
+                <LiveMarketCard key={questionId} questionId={questionId} />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12 text-muted-foreground">
+                No live markets available yet
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Demo Markets Section */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-gold/10 px-3 py-1.5 rounded-full">
+            <TrendingUp className="h-4 w-4 text-gold" />
+            <span className="text-sm font-semibold text-gold">More Markets</span>
+          </div>
+        </div>
+
+        {/* Demo Market Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {demoMarkets.map((market) => (
+            <MarketCard key={market.id} market={market} isDemo />
+          ))}
+        </div>
       </div>
     </div>
   )
