@@ -29,10 +29,10 @@ export function FloatingAudioButton() {
       onClick={handleClick}
       className={`
         fixed bottom-6 right-6 z-50
-        w-16 h-16 rounded-full
+        w-28 h-28 rounded-xl
         shadow-[0_4px_20px_rgba(0,0,0,0.3)]
         hover:shadow-[0_6px_30px_rgba(0,0,0,0.4)]
-        hover:scale-110
+        hover:scale-105
         active:scale-95
         transition-all duration-200 ease-out
         flex items-center justify-center
@@ -46,14 +46,14 @@ export function FloatingAudioButton() {
       <video
         ref={videoRef}
         src="/assets/videos/video.mp4"
-        className="absolute inset-0 w-full h-full object-cover rounded-full"
+        className="absolute inset-0 w-full h-full object-cover rounded-xl"
         onEnded={handleVideoEnd}
         playsInline
         muted={false}
       />
 
       {/* Ripple effect on hover */}
-      <span className="absolute inset-0 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 pointer-events-none" />
+      <span className="absolute inset-0 rounded-xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 pointer-events-none" />
     </button>
   )
 }
