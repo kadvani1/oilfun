@@ -1,45 +1,27 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
-import Image from "next/image"
+import { useState, useRef } from "react"
 
 export function FloatingAudioButton() {
   const [isPlaying, setIsPlaying] = useState(false)
-  const [isAnimating, setIsAnimating] = useState(false)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-
-  useEffect(() => {
-    // Initialize audio on mount
-    audioRef.current = new Audio("/assets/audio/audio.mp3")
-    audioRef.current.addEventListener("ended", () => {
-      setIsPlaying(false)
-    })
-
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause()
-        audioRef.current = null
-      }
-    }
-  }, [])
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   const handleClick = () => {
-    // Trigger animation
-    setIsAnimating(true)
-    setTimeout(() => setIsAnimating(false), 300)
-
-    if (audioRef.current) {
+    if (videoRef.current) {
       if (isPlaying) {
-        audioRef.current.pause()
-        audioRef.current.currentTime = 0
+        videoRef.current.pause()
         setIsPlaying(false)
       } else {
-        audioRef.current.play().catch((e) => {
-          console.log("Audio playback failed:", e)
+        videoRef.current.play().catch((e) => {
+          console.log("Video playback failed:", e)
         })
         setIsPlaying(true)
       }
     }
+  }
+
+  const handleVideoEnd = () => {
+    setIsPlaying(false)
   }
 
   return (
@@ -56,50 +38,22 @@ export function FloatingAudioButton() {
         flex items-center justify-center
         overflow-hidden
         group
-        ${isAnimating ? "animate-pulse scale-110" : ""}
         ${isPlaying ? "ring-4 ring-amber-300/50 ring-offset-2 ring-offset-background" : ""}
       `}
-      aria-label={isPlaying ? "Stop audio" : "Play audio"}
+      aria-label={isPlaying ? "Pause video" : "Play video"}
     >
-      {/* Ripple effect on hover */}
-      <span className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      
-      {/* Pulse animation when playing */}
-      {isPlaying && (
-        <>
-          <span className="absolute inset-0 rounded-full bg-amber-400 animate-ping opacity-30" />
-          <span className="absolute inset-0 rounded-full bg-amber-500 animate-pulse opacity-20" />
-        </>
-      )}
-      
-      {/* Logo */}
-      <div 
-        className="relative z-10 transition-transform duration-200"
-        style={isPlaying ? {
-          animation: "breathe 1.2s ease-in-out infinite"
-        } : undefined}
-      >
-        <Image
-          src="/assets/images/cnb_logo.jpg"
-          alt="CNB"
-          width={64}
-          height={64}
-          className="rounded-full object-cover drop-shadow-md"
-        />
-      </div>
+      {/* Video element */}
+      <video
+        ref={videoRef}
+        src="/assets/videos/video.mp4"
+        className="absolute inset-0 w-full h-full object-cover rounded-full"
+        onEnded={handleVideoEnd}
+        playsInline
+        muted={false}
+      />
 
-      {/* Expand/contract animation keyframes */}
-      <style jsx>{`
-        @keyframes breathe {
-          0%, 100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.15);
-          }
-        }
-      `}</style>
+      {/* Ripple effect on hover */}
+      <span className="absolute inset-0 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 pointer-events-none" />
     </button>
   )
 }
-
