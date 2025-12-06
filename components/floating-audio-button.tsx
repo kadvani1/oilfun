@@ -29,7 +29,7 @@ export function FloatingAudioButton() {
       onClick={handleClick}
       className={`
         fixed bottom-6 right-6 z-50
-        w-28 h-28 rounded-xl
+        w-[448px] h-[448px] rounded-2xl
         shadow-[0_4px_20px_rgba(0,0,0,0.3)]
         hover:shadow-[0_6px_30px_rgba(0,0,0,0.4)]
         hover:scale-105
