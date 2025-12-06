@@ -29,31 +29,32 @@ export function FloatingAudioButton() {
       onClick={handleClick}
       className={`
         fixed bottom-6 right-6 z-50
-        w-[448px] h-[448px] rounded-2xl
         shadow-[0_4px_20px_rgba(0,0,0,0.3)]
         hover:shadow-[0_6px_30px_rgba(0,0,0,0.4)]
-        hover:scale-105
         active:scale-95
-        transition-all duration-200 ease-out
+        transition-all duration-300 ease-out
         flex items-center justify-center
         overflow-hidden
         group
-        ${isPlaying ? "ring-4 ring-amber-300/50 ring-offset-2 ring-offset-background" : ""}
+        ${isPlaying 
+          ? "w-[448px] h-[448px] rounded-2xl ring-4 ring-amber-300/50 ring-offset-2 ring-offset-background" 
+          : "w-20 h-20 rounded-xl hover:scale-110"
+        }
       `}
-      aria-label={isPlaying ? "Pause video" : "Play video"}
+      aria-label={isPlaying ? "Close video" : "Play video"}
     >
       {/* Video element */}
       <video
         ref={videoRef}
         src="/assets/videos/video.mp4"
-        className="absolute inset-0 w-full h-full object-cover rounded-xl"
+        className={`absolute inset-0 w-full h-full object-cover transition-all duration-300 ${isPlaying ? "rounded-2xl" : "rounded-xl"}`}
         onEnded={handleVideoEnd}
         playsInline
         muted={false}
       />
 
       {/* Ripple effect on hover */}
-      <span className="absolute inset-0 rounded-xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 pointer-events-none" />
+      <span className={`absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 pointer-events-none ${isPlaying ? "rounded-2xl" : "rounded-xl"}`} />
     </button>
   )
 }
